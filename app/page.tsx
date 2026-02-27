@@ -2,7 +2,7 @@ import Header from '@/components/header'
 import BottomNavigation from '@/components/bottom-navigation'
 import ClientLayout from '@/components/client-layout'
 import AppointmentCard from '@/components/appointment-card'
-import { getTodayAppointments } from '@/lib/db'
+import { getTodayAppointments, getAllPets } from '@/lib/db'
 import { CalendarX, AlertCircle } from 'lucide-react'
 
 export const metadata = {
@@ -70,7 +70,15 @@ async function AppointmentsList() {
   }
 }
 
-export default function Home() {
+export default async function Home() {
+  let pets = []
+
+  try {
+    pets = await getAllPets()
+  } catch (error) {
+    console.error('Error fetching pets:', error)
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
@@ -83,7 +91,7 @@ export default function Home() {
       </main>
 
       <BottomNavigation activeTab="hoy" />
-      <ClientLayout />
+      <ClientLayout pets={pets} />
     </div>
   )
 }

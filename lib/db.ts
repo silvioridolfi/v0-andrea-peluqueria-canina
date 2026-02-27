@@ -14,6 +14,13 @@ export interface Appointment {
   precio_final: number
 }
 
+export interface Pet {
+  id: number
+  nombre: string
+  raza: string
+  tipo_animal: string
+}
+
 export async function getTodayAppointments(): Promise<Appointment[]> {
   try {
     if (!process.env.DATABASE_URL) {
@@ -43,5 +50,73 @@ export async function getTodayAppointments(): Promise<Appointment[]> {
   } catch (error) {
     console.error('Error fetching appointments:', error)
     throw error
+  }
+}
+
+export async function getAllPets(): Promise<Pet[]> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+
+    const result = await sql`
+      SELECT id, nombre, raza, tipo_animal
+      FROM mascotas
+      ORDER BY nombre ASC
+    `
+
+    return result as Pet[]
+  } catch (error) {
+    console.error('Error fetching pets:', error)
+    throw error
+  }
+}
+
+export async function insertAppointment(
+  mascota_id: number,
+  fecha: string,
+  hora_inicio: string,
+  servicio: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+
+    // Calculate hora_fin (1 hour after hora_inicio)
+    const [hours, minutes] = hora_inicio.split(':').map(Number)
+    const endTime = new Date(0, 0, 0, hours + 1, minutes)
+    const hora_fin = `${String(endTime.getHours()).padStart(2, '0')}:${String(endTime.getMinutes()).padStart(2, '0')}`
+
+    // Check for overlapping appointments
+    const overlapping = await sql`
+      SELECT id FROM turnos
+      WHERE mascota_id = ${mascota_id}
+      AND DATE(fecha) = ${fecha}
+      AND (
+        (hora_inicio < ${hora_fin} AND hora_fin > ${hora_inicio})
+      )
+    `
+
+    if (overlapping.length > 0) {
+      return {
+        success: false,
+        error: 'Ya existe un turno superpuesto para esta mascota en ese horario'
+      }
+    }
+
+    // Insert the appointment
+    await sql`
+      INSERT INTO turnos (mascota_id, fecha, hora_inicio, hora_fin, servicio, estado, precio_final)
+      VALUES (${mascota_id}, ${fecha}, ${hora_inicio}, ${hora_fin}, ${servicio}, 'agendado', 0)
+    `
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error inserting appointment:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Error al crear el turno'
+    }
   }
 }
