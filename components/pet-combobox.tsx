@@ -28,7 +28,7 @@ interface PetComboboxProps {
 export default function PetCombobox({ pets, value, onValueChange }: PetComboboxProps) {
   const [open, setOpen] = useState(false)
 
-  const selectedPet = pets.find(pet => pet.id === value)
+  const selectedPet = pets.find(pet => pet.id.toString() === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -50,7 +50,7 @@ export default function PetCombobox({ pets, value, onValueChange }: PetComboboxP
           filter={(value, search) => {
             // Case-insensitive search: compare lowercase versions
             const searchLower = search.toLowerCase()
-            const pet = pets.find(p => p.id === value)
+            const pet = pets.find(p => p.id.toString() === value)
             
             if (!pet) return 0
             
@@ -71,7 +71,7 @@ export default function PetCombobox({ pets, value, onValueChange }: PetComboboxP
               {pets.map(pet => (
                 <CommandItem
                   key={pet.id}
-                  value={pet.id}  // Pass UUID string directly, not toString()
+                  value={pet.id.toString()}  // Pass numeric ID as string
                   onSelect={(currentValue) => {
                     onValueChange(currentValue === value ? '' : currentValue)
                     setOpen(false)
@@ -80,7 +80,7 @@ export default function PetCombobox({ pets, value, onValueChange }: PetComboboxP
                   <Check
                     className={cn(
                       'mr-2 h-4 w-4',
-                      value === pet.id ? 'opacity-100' : 'opacity-0'
+                      value === pet.id.toString() ? 'opacity-100' : 'opacity-0'
                     )}
                   />
                   <div className="flex flex-col">
