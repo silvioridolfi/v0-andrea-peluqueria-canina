@@ -83,6 +83,8 @@ export default function NewAppointmentForm({
         throw new Error('ID de mascota inválido')
       }
 
+      console.log('[v0] Enviando datos:', { mascota_id: mascotaIdNum, fecha: formData.fecha, hora_inicio: formData.hora_inicio, servicio: formData.servicio })
+
       const result = await crearTurno({
         mascota_id: mascotaIdNum,
         fecha: formData.fecha,
@@ -90,7 +92,10 @@ export default function NewAppointmentForm({
         servicio: formData.servicio,
       })
 
+      console.log('[v0] Respuesta del servidor:', result)
+
       if (result.success) {
+        console.log('[v0] Turno creado exitosamente')
         toast({
           title: 'Éxito',
           description: 'Turno creado correctamente',
@@ -98,8 +103,9 @@ export default function NewAppointmentForm({
         // Close drawer after success
         onOpenChange(false)
       } else {
-        // Extract error message safely
-        const errorMsg = result.error ? String(result.error) : 'Error al crear el turno'
+        // Extract error message safely - ensure it's never undefined/null
+        const errorMsg = (result.error ? String(result.error).trim() : '') || 'Error al crear el turno'
+        console.log('[v0] Error al crear turno:', errorMsg, 'Tipo:', typeof errorMsg)
         toast({
           title: 'Error',
           description: errorMsg,
@@ -107,11 +113,12 @@ export default function NewAppointmentForm({
         })
       }
     } catch (error) {
-      console.error('[v0] Error in handleSubmit:', error)
-      const errorMsg = error instanceof Error ? error.message : 'Error al crear el turno'
+      console.error('[v0] Error en handleSubmit:', error)
+      const errorMsg = (error instanceof Error ? error.message.trim() : '') || 'Error desconocido'
+      console.log('[v0] Mensaje de error a mostrar:', errorMsg, 'Tipo:', typeof errorMsg)
       toast({
         title: 'Error',
-        description: errorMsg,
+        description: errorMsg || 'Hubo un error al crear el turno',
         variant: 'destructive',
       })
     } finally {
