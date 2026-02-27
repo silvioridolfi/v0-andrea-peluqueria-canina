@@ -201,3 +201,63 @@ export async function finalizarTurnoDb(
     }
   }
 }
+
+export async function getAppointmentsByDate(fecha: string): Promise<Appointment[]> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+
+    const result = await sql`
+      SELECT 
+        t.id,
+        t.hora_inicio,
+        t.hora_fin,
+        m.nombre as mascota_nombre,
+        m.raza as mascota_raza,
+        m.tipo_animal as mascota_tipo,
+        t.servicio,
+        t.estado,
+        t.precio_final
+      FROM turnos t
+      JOIN mascotas m ON t.mascota_id = m.id
+      WHERE DATE(t.fecha) = ${fecha}
+      ORDER BY t.hora_inicio ASC
+    `
+
+    return result as Appointment[]
+  } catch (error) {
+    console.error('[v0] Error fetching appointments by date:', error)
+    return []
+  }
+}
+
+export async function getAppointmentsByMonth(year: number, month: number): Promise<{ [key: string]: number }> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+
+    // Get the first and last day of the month
+    const firstDay = new Date(year, month - 1, 1).toISOString().split('T')[0]
+    const lastDay = new Date(year, month, 0).toISOString().split('T')[0]
+
+    const result = await sql`
+      SELECT DATE(t.fecha) as fecha, COUNT(*) as count
+      FROM turnos t
+      WHERE DATE(t.fecha) BETWEEN ${firstDay} AND ${lastDay}
+      GROUP BY DATE(t.fecha)
+    `
+
+    // Transform into a simple object: { "2025-02-15": 2, "2025-02-16": 1 }
+    const appointmentsByDate: { [key: string]: number } = {}
+    result.forEach((row: any) => {
+      appointmentsByDate[row.fecha] = row.count
+    })
+
+    return appointmentsByDate
+  } catch (error) {
+    console.error('[v0] Error fetching appointments by month:', error)
+    return {}
+  }
+}

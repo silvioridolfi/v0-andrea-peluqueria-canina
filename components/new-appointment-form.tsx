@@ -25,24 +25,36 @@ import { crearTurno } from '@/lib/actions'
 import { Pet } from '@/lib/db'
 
 interface NewAppointmentFormProps {
-  pets: Pet[]
+  pets?: Pet[]
   isOpen: boolean
   onOpenChange: (open: boolean) => void
+  preselectedDate?: Date
 }
 
 export default function NewAppointmentForm({ 
-  pets, 
+  pets = [], 
   isOpen,
-  onOpenChange
+  onOpenChange,
+  preselectedDate
 }: NewAppointmentFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     mascota_id: '',
-    fecha: new Date().toISOString().split('T')[0],
+    fecha: preselectedDate ? preselectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     hora_inicio: '10:00',
     servicio: 'Corte',
   })
   const { toast } = useToast()
+
+  // Update fecha when preselectedDate changes
+  useEffect(() => {
+    if (preselectedDate) {
+      setFormData(prev => ({
+        ...prev,
+        fecha: preselectedDate.toISOString().split('T')[0]
+      }))
+    }
+  }, [preselectedDate])
 
   // Reset form when drawer closes
   useEffect(() => {
