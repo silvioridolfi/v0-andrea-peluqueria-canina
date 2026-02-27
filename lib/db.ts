@@ -15,7 +15,7 @@ export interface Appointment {
 }
 
 export interface Pet {
-  id: number  // The database actually uses numeric IDs, not UUIDs
+  id: string  // Database uses UUID, not numeric ID
   nombre: string
   raza: string
   tipo_animal: string
@@ -73,7 +73,7 @@ export async function getAllPets(): Promise<Pet[]> {
 }
 
 export async function insertAppointment(
-  mascota_id: number,  // Numeric ID
+  mascota_id: string,  // UUID string
   fecha: string,
   hora_inicio: string,
   servicio: string
@@ -83,8 +83,8 @@ export async function insertAppointment(
       throw new Error('DATABASE_URL is not configured')
     }
 
-    // Validate mascota_id (must be a number)
-    if (!mascota_id || typeof mascota_id !== 'number' || isNaN(mascota_id)) {
+    // Validate mascota_id (UUID format - string)
+    if (!mascota_id || typeof mascota_id !== 'string' || mascota_id.trim() === '') {
       return {
         success: false,
         error: 'ID de mascota inválido'
