@@ -89,15 +89,20 @@ export default function NewAppointmentForm({
 
     setIsLoading(true)
     try {
-      // mascota_id is already a UUID string from the combobox
+      // Validate mascota_id is a proper UUID string
       if (!formData.mascota_id || typeof formData.mascota_id !== 'string' || formData.mascota_id.trim() === '') {
-        throw new Error('ID de mascota inválido')
+        throw new Error('ID de mascota inválido - por favor selecciona una mascota válida')
       }
 
-      console.log('[v0] Enviando datos:', { mascota_id: formData.mascota_id, fecha: formData.fecha, hora_inicio: formData.hora_inicio, servicio: formData.servicio })
+      // Validate all required fields
+      if (!formData.fecha || !formData.hora_inicio || !formData.servicio) {
+        throw new Error('Por favor completa todos los campos requeridos')
+      }
+
+      console.log('[v0] Enviando turno con datos:', { mascota_id: formData.mascota_id, fecha: formData.fecha, hora_inicio: formData.hora_inicio, servicio: formData.servicio })
 
       const result = await crearTurno({
-        mascota_id: formData.mascota_id,  // Send UUID string directly
+        mascota_id: formData.mascota_id,
         fecha: formData.fecha,
         hora_inicio: formData.hora_inicio,
         servicio: formData.servicio,
@@ -111,12 +116,10 @@ export default function NewAppointmentForm({
           title: 'Éxito',
           description: 'Turno creado correctamente',
         })
-        // Close drawer after success
         onOpenChange(false)
       } else {
-        // Extract error message safely - ensure it's never undefined/null
         const errorMsg = (result.error ? String(result.error).trim() : '') || 'Error al crear el turno'
-        console.log('[v0] Error al crear turno:', errorMsg, 'Tipo:', typeof errorMsg)
+        console.log('[v0] Error del servidor:', errorMsg)
         toast({
           title: 'Error',
           description: errorMsg,
@@ -125,11 +128,11 @@ export default function NewAppointmentForm({
       }
     } catch (error) {
       console.error('[v0] Error en handleSubmit:', error)
-      const errorMsg = (error instanceof Error ? error.message.trim() : '') || 'Error desconocido'
-      console.log('[v0] Mensaje de error a mostrar:', errorMsg, 'Tipo:', typeof errorMsg)
+      const errorMsg = (error instanceof Error ? error.message : String(error)) || 'Error desconocido'
+      console.log('[v0] Mensaje de error capturado:', errorMsg)
       toast({
         title: 'Error',
-        description: errorMsg || 'Hubo un error al crear el turno',
+        description: errorMsg,
         variant: 'destructive',
       })
     } finally {

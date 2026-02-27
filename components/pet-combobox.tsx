@@ -30,6 +30,12 @@ export default function PetCombobox({ pets, value, onValueChange }: PetComboboxP
 
   const selectedPet = pets.find(pet => pet.id === value)
 
+  const handleSelect = (currentValue: string) => {
+    console.log('[v0] Combobox selecting pet with id:', currentValue)
+    onValueChange(currentValue === value ? '' : currentValue)
+    setOpen(false)
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -72,10 +78,7 @@ export default function PetCombobox({ pets, value, onValueChange }: PetComboboxP
                 <CommandItem
                   key={pet.id}
                   value={pet.id}  // Pass UUID string directly
-                  onSelect={(currentValue) => {
-                    onValueChange(currentValue === value ? '' : currentValue)
-                    setOpen(false)
-                  }}
+                  onSelect={handleSelect}
                 >
                   <Check
                     className={cn(

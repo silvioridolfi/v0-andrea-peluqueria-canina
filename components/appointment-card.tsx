@@ -12,6 +12,9 @@ interface AppointmentCardProps {
 
 export default function AppointmentCard({ appointment, onCheckout }: AppointmentCardProps) {
   const isCompleted = appointment.estado === 'finalizado'
+  
+  // Remove seconds from time display (convert HH:mm:ss to HH:mm)
+  const displayTime = appointment.hora_inicio.substring(0, 5)
 
   return (
     <Card className="bg-card border-border overflow-hidden">
@@ -19,7 +22,7 @@ export default function AppointmentCard({ appointment, onCheckout }: Appointment
         {/* Time - Large and prominent */}
         <div className="flex items-start justify-between">
           <div className="text-3xl font-heading font-bold text-primary">
-            {appointment.hora_inicio}
+            {displayTime}
           </div>
           {isCompleted && (
             <Badge className="bg-accent text-accent-foreground">
