@@ -11,6 +11,7 @@ interface HybridCalendarProps {
   appointmentsForDate: Appointment[]
   selectedDate: Date
   onCheckout?: (appointment: Appointment) => void
+  diasConTurnos: Date[]
 }
 
 export default function HybridCalendar({
@@ -18,14 +19,15 @@ export default function HybridCalendar({
   onDateSelect,
   appointmentsForDate,
   selectedDate,
-  onCheckout
+  onCheckout,
+  diasConTurnos
 }: HybridCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
 
-  // Create a custom day renderer that shows indicators
-  const disabledDays = useMemo(() => {
-    return Object.keys(appointmentsByMonth).map(dateStr => new Date(dateStr))
-  }, [appointmentsByMonth])
+  // Create modifiers object for days with appointments
+  const modifiers = useMemo(() => ({
+    booked: diasConTurnos
+  }), [diasConTurnos])
 
   const formattedDate = selectedDate.toLocaleDateString('es-AR', {
     weekday: 'long',
@@ -47,6 +49,10 @@ export default function HybridCalendar({
           month={currentMonth}
           onMonthChange={setCurrentMonth}
           disabled={(date) => false}
+          modifiers={modifiers}
+          modifiersClassNames={{
+            booked: "relative after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full"
+          }}
           className="w-full"
         />
         

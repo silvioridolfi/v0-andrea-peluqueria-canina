@@ -1,4 +1,4 @@
-import { getAppointmentsByMonth, getAppointmentsByDate, getAllPets } from '@/lib/db'
+import { getAppointmentsByMonth, getAppointmentsByDate, getAllPets, getDiasConTurnos, getTodayDateString } from '@/lib/db'
 import AgendaClient from '@/components/agenda-client'
 
 export const metadata = {
@@ -14,8 +14,11 @@ export default async function AgendaPage() {
   // Get appointments for the current month
   const appointmentsByMonth = await getAppointmentsByMonth(year, month)
 
-  // Get appointments for today
-  const todayStr = today.toISOString().split('T')[0]
+  // Get days with appointments for calendar indicators
+  const diasConTurnos = await getDiasConTurnos(year, month)
+
+  // Get appointments for today using Buenos Aires timezone
+  const todayStr = getTodayDateString()
   const appointmentsForToday = await getAppointmentsByDate(todayStr)
 
   // Get all pets
@@ -43,6 +46,7 @@ export default async function AgendaPage() {
           <AgendaClient 
             initialAppointmentsByMonth={appointmentsByMonth}
             initialAppointmentsForToday={appointmentsForToday}
+            diasConTurnos={diasConTurnos}
             pets={pets}
           />
         </div>

@@ -50,18 +50,32 @@ export async function crearTurno(formData: {
   }
 }
 
-export async function finalizarTurno(turnoId: number, precio: number) {
+export async function finalizarTurno(turnoId: number, precio: string | number) {
   try {
-    console.log('[v0] finalizarTurno: Recibido turnoId:', turnoId, 'precio:', precio)
+    console.log('[v0] finalizarTurno: Recibido turnoId:', turnoId, 'precio (raw):', precio)
 
-    if (!turnoId || isNaN(turnoId) || !precio || isNaN(precio) || precio <= 0) {
+    // Convert precio to number if it's a string
+    const precioNum = typeof precio === 'string' ? parseFloat(precio) : precio
+    console.log('[v0] finalizarTurno: precio convertido a:', precioNum, 'tipo:', typeof precioNum)
+
+    // Validate inputs
+    if (!turnoId || isNaN(turnoId) || turnoId <= 0) {
       return {
         success: false,
-        error: 'Datos inválidos para finalizar turno'
+        error: 'ID de turno inválido'
       }
     }
 
-    const result = await finalizarTurnoDb(turnoId, precio)
+    if (!precioNum || isNaN(precioNum) || precioNum <= 0) {
+      return {
+        success: false,
+        error: 'Por favor ingresa un precio válido mayor a 0'
+      }
+    }
+
+    console.log('[v0] finalizarTurno: Validaciones pasadas, llamando finalizarTurnoDb')
+
+    const result = await finalizarTurnoDb(turnoId, precioNum)
 
     if (!result.success) {
       console.log('[v0] finalizarTurno: Error:', result.error)

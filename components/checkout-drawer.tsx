@@ -31,6 +31,9 @@ export default function CheckoutDrawer({
   const [precio, setPrecio] = useState('')
   const { toast } = useToast()
 
+  // Remove seconds from time display
+  const displayTime = appointment ? appointment.hora_inicio.substring(0, 5) : ''
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -111,11 +114,20 @@ export default function CheckoutDrawer({
                 {appointment.mascota_raza}
               </p>
 
-              <div className="pt-2 border-t border-border">
-                <p className="text-sm text-muted-foreground">Servicio</p>
-                <p className="text-base font-medium text-foreground">
-                  {appointment.servicio}
-                </p>
+              <div className="pt-2 border-t border-border space-y-3">
+                <div>
+                  <p className="text-sm text-muted-foreground">Hora</p>
+                  <p className="text-base font-medium text-foreground">
+                    {displayTime}
+                  </p>
+                </div>
+                
+                <div>
+                  <p className="text-sm text-muted-foreground">Servicio</p>
+                  <p className="text-base font-medium text-foreground">
+                    {appointment.servicio}
+                  </p>
+                </div>
               </div>
             </div>
 

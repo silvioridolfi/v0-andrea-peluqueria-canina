@@ -13,12 +13,14 @@ import { getAppointmentsByDate } from '@/lib/db'
 interface AgendaClientProps {
   initialAppointmentsByMonth: { [key: string]: number }
   initialAppointmentsForToday: Appointment[]
+  diasConTurnos: Date[]
   pets: Pet[]
 }
 
 export default function AgendaClient({
   initialAppointmentsByMonth,
   initialAppointmentsForToday,
+  diasConTurnos,
   pets
 }: AgendaClientProps) {
   const router = useRouter()
@@ -54,6 +56,7 @@ export default function AgendaClient({
         appointmentsForDate={appointmentsForDate}
         selectedDate={selectedDate}
         onCheckout={handleCheckout}
+        diasConTurnos={diasConTurnos}
       />
 
       {/* Checkout Drawer */}

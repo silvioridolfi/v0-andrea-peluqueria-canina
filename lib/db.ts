@@ -12,6 +12,23 @@ function getSql() {
   return sql
 }
 
+// Get today's date in Buenos Aires timezone (America/Argentina/Buenos_Aires)
+export function getTodayDateString(): string {
+  const formatter = new Intl.DateTimeFormat('es-AR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: 'America/Argentina/Buenos_Aires'
+  })
+  
+  const parts = formatter.formatToParts(new Date())
+  const year = parts.find(p => p.type === 'year')?.value
+  const month = parts.find(p => p.type === 'month')?.value
+  const day = parts.find(p => p.type === 'day')?.value
+  
+  return `${year}-${month}-${day}`
+}
+
 export interface Appointment {
   id: number
   hora_inicio: string
@@ -37,7 +54,8 @@ export async function getTodayAppointments(): Promise<Appointment[]> {
       throw new Error('DATABASE_URL is not configured')
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = getTodayDateString()
+    console.log('[v0] getTodayAppointments: Today in Buenos Aires =', today)
 
     const result = await getSql()`
       SELECT 
@@ -269,5 +287,37 @@ export async function getAppointmentsByMonth(year: number, month: number): Promi
   } catch (error) {
     console.error('[v0] Error fetching appointments by month:', error)
     return {}
+  }
+}
+
+export async function getDiasConTurnos(year: number, month: number): Promise<Date[]> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+
+    // Get the first and last day of the month
+    const firstDay = new Date(year, month - 1, 1).toISOString().split('T')[0]
+    const lastDay = new Date(year, month, 0).toISOString().split('T')[0]
+
+    console.log('[v0] getDiasConTurnos: Fetching days with appointments for', year, month)
+
+    const result = await getSql()`
+      SELECT DISTINCT DATE(t.fecha) as fecha
+      FROM turnos t
+      WHERE DATE(t.fecha) BETWEEN ${firstDay} AND ${lastDay}
+      ORDER BY DATE(t.fecha) ASC
+    `
+
+    // Convert to array of Date objects
+    const diasConTurnos: Date[] = result.map((row: any) => {
+      return new Date(row.fecha + 'T00:00:00Z')
+    })
+
+    console.log('[v0] getDiasConTurnos: Found', diasConTurnos.length, 'days with appointments')
+    return diasConTurnos
+  } catch (error) {
+    console.error('[v0] Error fetching days with appointments:', error)
+    return []
   }
 }
