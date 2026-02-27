@@ -77,16 +77,15 @@ export default function NewAppointmentForm({
 
     setIsLoading(true)
     try {
-      // Ensure mascota_id is a valid number
-      const mascotaIdNum = parseInt(formData.mascota_id, 10)
-      if (isNaN(mascotaIdNum)) {
+      // mascota_id is already a UUID string from the combobox, no need to parse
+      if (!formData.mascota_id || typeof formData.mascota_id !== 'string') {
         throw new Error('ID de mascota inválido')
       }
 
-      console.log('[v0] Enviando datos:', { mascota_id: mascotaIdNum, fecha: formData.fecha, hora_inicio: formData.hora_inicio, servicio: formData.servicio })
+      console.log('[v0] Enviando datos:', { mascota_id: formData.mascota_id, fecha: formData.fecha, hora_inicio: formData.hora_inicio, servicio: formData.servicio })
 
       const result = await crearTurno({
-        mascota_id: mascotaIdNum,
+        mascota_id: formData.mascota_id,  // Send UUID string directly
         fecha: formData.fecha,
         hora_inicio: formData.hora_inicio,
         servicio: formData.servicio,

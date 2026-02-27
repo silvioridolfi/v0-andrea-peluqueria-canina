@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { insertAppointment } from '@/lib/db'
 
 export async function crearTurno(formData: {
-  mascota_id: number
+  mascota_id: string  // Now a UUID string
   fecha: string
   hora_inicio: string
   servicio: string
