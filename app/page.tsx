@@ -1,6 +1,6 @@
 import Header from '@/components/header'
 import BottomNavigation from '@/components/bottom-navigation'
-import FABButton from '@/components/fab-button'
+import ClientLayout from '@/components/client-layout'
 import AppointmentCard from '@/components/appointment-card'
 import { getTodayAppointments } from '@/lib/db'
 import { CalendarX, AlertCircle } from 'lucide-react'
@@ -70,11 +70,6 @@ async function AppointmentsList() {
   }
 }
 
-const handleAddAppointment = () => {
-  // TODO: Implement add appointment flow
-  console.log('Add appointment clicked')
-}
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50">
@@ -88,7 +83,7 @@ export default function Home() {
       </main>
 
       <BottomNavigation activeTab="hoy" />
-      <FABButton onClick={handleAddAppointment} />
+      <ClientLayout />
     </div>
   )
 }
