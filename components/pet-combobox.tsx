@@ -40,7 +40,7 @@ export default function PetCombobox({ pets, value, onValueChange }: PetComboboxP
           className="w-full justify-between"
         >
           {selectedPet
-            ? `${selectedPet.nombre} (${selectedPet.raza})`
+            ? `${selectedPet.nombre} (${selectedPet.raza || 'Raza desconocida'})`
             : 'Selecciona una mascota...'}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -55,10 +55,10 @@ export default function PetCombobox({ pets, value, onValueChange }: PetComboboxP
             
             if (!pet) return 0
             
-            // Search in nombre y raza (both lowercased)
+            // Search in nombre y raza (both lowercased), handle null raza
             if (
               pet.nombre.toLowerCase().includes(searchLower) ||
-              pet.raza.toLowerCase().includes(searchLower)
+              (pet.raza && pet.raza.toLowerCase().includes(searchLower))
             ) {
               return 1
             }
@@ -86,7 +86,7 @@ export default function PetCombobox({ pets, value, onValueChange }: PetComboboxP
                   />
                   <div className="flex flex-col">
                     <span>{pet.nombre}</span>
-                    <span className="text-xs text-slate-500">{pet.raza}</span>
+                    <span className="text-xs text-slate-500">{pet.raza || 'Raza desconocida'}</span>
                   </div>
                 </CommandItem>
               ))}
