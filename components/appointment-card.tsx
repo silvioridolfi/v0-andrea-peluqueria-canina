@@ -1,14 +1,13 @@
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Appointment } from '@/lib/mock-data'
+import { Appointment } from '@/lib/db'
 
 interface AppointmentCardProps {
   appointment: Appointment
-  onComplete?: (id: string) => void
 }
 
-export default function AppointmentCard({ appointment, onComplete }: AppointmentCardProps) {
+export default function AppointmentCard({ appointment }: AppointmentCardProps) {
   const isCompleted = appointment.estado === 'finalizado'
 
   return (
@@ -44,7 +43,6 @@ export default function AppointmentCard({ appointment, onComplete }: Appointment
         {/* Action button */}
         {!isCompleted && (
           <Button
-            onClick={() => onComplete?.(appointment.id)}
             className="w-full bg-amber-600 hover:bg-amber-700 text-white"
           >
             Finalizar y Cobrar
