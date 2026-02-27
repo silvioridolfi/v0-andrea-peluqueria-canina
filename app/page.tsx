@@ -1,7 +1,7 @@
 import Header from '@/components/header'
 import BottomNavigation from '@/components/bottom-navigation'
 import ClientLayout from '@/components/client-layout'
-import AppointmentCard from '@/components/appointment-card'
+import AppointmentsListClient from '@/components/appointments-list-client'
 import { getTodayAppointments, getAllPets } from '@/lib/db'
 import { CalendarX, AlertCircle } from 'lucide-react'
 
@@ -39,21 +39,7 @@ async function AppointmentsList() {
       )
     }
 
-    return (
-      <>
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide px-1">
-          Turnos de Hoy
-        </h2>
-        <div className="space-y-3">
-          {appointments.map(appointment => (
-            <AppointmentCard
-              key={appointment.id}
-              appointment={appointment}
-            />
-          ))}
-        </div>
-      </>
-    )
+    return <AppointmentsListClient appointments={appointments} />
   } catch (error) {
     console.error('Error loading appointments:', error)
     return (

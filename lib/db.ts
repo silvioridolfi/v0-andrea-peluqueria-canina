@@ -153,3 +153,51 @@ export async function insertAppointment(
     }
   }
 }
+
+export async function finalizarTurnoDb(
+  turnoId: number,
+  precio: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+
+    console.log('[v0] finalizarTurnoDb: Actualizando turno', turnoId, 'con precio:', precio)
+
+    // Update turno - set estado to 'finalizado' and precio_final
+    const updateResult = await sql`
+      UPDATE turnos
+      SET estado = 'finalizado', precio_final = ${precio}
+      WHERE id = ${turnoId}
+      RETURNING id
+    `
+
+    if (!updateResult || updateResult.length === 0) {
+      return {
+        success: false,
+        error: 'No se encontró el turno para actualizar'
+      }
+    }
+
+    console.log('[v0] Turno actualizado:', updateResult)
+
+    // Insert into movimientos_financieros
+    const movimientoResult = await sql`
+      INSERT INTO movimientos_financieros (tipo, monto, turno_id, descripcion, fecha)
+      VALUES ('ingreso', ${precio}, ${turnoId}, 'Cobro de servicio', CURRENT_DATE)
+      RETURNING id
+    `
+
+    console.log('[v0] Movimiento financiero registrado:', movimientoResult)
+
+    return { success: true }
+  } catch (error: any) {
+    const errorMsg = error?.message || String(error)
+    console.error('[v0] Error finalizando turno:', errorMsg)
+    return {
+      success: false,
+      error: errorMsg
+    }
+  }
+}

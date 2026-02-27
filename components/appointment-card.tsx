@@ -1,3 +1,5 @@
+'use client'
+
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -5,9 +7,10 @@ import { Appointment } from '@/lib/db'
 
 interface AppointmentCardProps {
   appointment: Appointment
+  onCheckout?: (appointment: Appointment) => void
 }
 
-export default function AppointmentCard({ appointment }: AppointmentCardProps) {
+export default function AppointmentCard({ appointment, onCheckout }: AppointmentCardProps) {
   const isCompleted = appointment.estado === 'finalizado'
 
   return (
@@ -19,7 +22,9 @@ export default function AppointmentCard({ appointment }: AppointmentCardProps) {
             {appointment.hora_inicio}
           </div>
           {isCompleted && (
-            <Badge className="bg-accent text-accent-foreground">Finalizado</Badge>
+            <Badge className="bg-accent text-accent-foreground">
+              Finalizado
+            </Badge>
           )}
         </div>
 
@@ -40,13 +45,20 @@ export default function AppointmentCard({ appointment }: AppointmentCardProps) {
           </p>
         </div>
 
-        {/* Action button */}
-        {!isCompleted && (
+        {/* Action button or completed info */}
+        {!isCompleted ? (
           <Button
+            onClick={() => onCheckout?.(appointment)}
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             Finalizar y Cobrar
           </Button>
+        ) : (
+          <div className="p-3 bg-accent/10 rounded-lg border border-accent/30">
+            <p className="text-sm text-accent font-heading font-semibold">
+              Cobrado: ${appointment.precio_final.toFixed(2)}
+            </p>
+          </div>
         )}
       </div>
     </Card>
