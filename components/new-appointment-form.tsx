@@ -92,9 +92,11 @@ export default function NewAppointmentForm({
         // Close drawer after success
         onOpenChange(false)
       } else {
+        // Extract error message safely
+        const errorMsg = result.error ? String(result.error) : 'Error al crear el turno'
         toast({
           title: 'Error',
-          description: result.error || 'Error al crear el turno',
+          description: errorMsg,
           variant: 'destructive',
         })
       }

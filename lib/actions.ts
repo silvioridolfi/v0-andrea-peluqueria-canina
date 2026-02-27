@@ -29,10 +29,11 @@ export async function crearTurno(formData: {
 
     return { success: true }
   } catch (error) {
-    console.error('Error in crearTurno:', error)
+    const errorMessage = error instanceof Error ? error.message : JSON.stringify(error)
+    console.error('[v0] Error in crearTurno:', errorMessage)
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Error al crear el turno'
+      error: errorMessage
     }
   }
 }

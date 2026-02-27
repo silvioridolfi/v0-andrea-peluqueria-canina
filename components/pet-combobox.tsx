@@ -46,7 +46,25 @@ export default function PetCombobox({ pets, value, onValueChange }: PetComboboxP
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command>
+        <Command
+          filter={(value, search) => {
+            // Case-insensitive search: compare lowercase versions
+            const searchLower = search.toLowerCase()
+            const petId = value.toLowerCase()
+            const pet = pets.find(p => p.id.toString() === petId)
+            
+            if (!pet) return 0
+            
+            // Search in nombre y raza (both lowercased)
+            if (
+              pet.nombre.toLowerCase().includes(searchLower) ||
+              pet.raza.toLowerCase().includes(searchLower)
+            ) {
+              return 1
+            }
+            return 0
+          }}
+        >
           <CommandInput placeholder="Buscar mascota..." />
           <CommandEmpty>No se encontró mascota.</CommandEmpty>
           <CommandList>

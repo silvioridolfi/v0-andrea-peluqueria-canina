@@ -83,15 +83,33 @@ export async function insertAppointment(
       throw new Error('DATABASE_URL is not configured')
     }
 
-    console.log('[v0] insertAppointment called with:', { mascota_id, fecha, hora_inicio, servicio })
+    // Validate mascota_id
+    if (!mascota_id || isNaN(mascota_id)) {
+      return {
+        success: false,
+        error: 'ID de mascota inválido'
+      }
+    }
 
-    // Calculate hora_fin (1 hour after hora_inicio) with proper HH:MM:SS format
-    const [hours, minutes] = hora_inicio.split(':').map(Number)
-    const endTime = new Date(0, 0, 0, hours + 1, minutes)
-    const hora_fin = `${String(endTime.getHours()).padStart(2, '0')}:${String(endTime.getMinutes()).padStart(2, '0')}:00`
-    const hora_inicio_formatted = `${hora_inicio}:00`
+    // Format times strictly: if hora_inicio is "10:30", calculate hora_fin properly
+    const [h, m] = hora_inicio.split(':')
+    const horaNum = parseInt(h)
+    const minNum = parseInt(m)
+    
+    if (isNaN(horaNum) || isNaN(minNum)) {
+      return {
+        success: false,
+        error: 'Formato de hora inválido'
+      }
+    }
 
-    console.log('[v0] Calculated times:', { hora_inicio_formatted, hora_fin })
+    // Calculate hora_fin: add 1 hour, handle day overflow
+    const horaFinNum = (horaNum + 1) % 24
+    const hora_inicio_formatted = `${String(horaNum).padStart(2, '0')}:${String(minNum).padStart(2, '0')}:00`
+    const hora_fin = `${String(horaFinNum).padStart(2, '0')}:${String(minNum).padStart(2, '0')}:00`
+
+    // Log the payload BEFORE making the query
+    console.log('[v0] INTENTANDO INSERTAR:', { mascota_id, fecha, hora_inicio_formatted, hora_fin, servicio })
 
     // Check for overlapping appointments
     const overlapping = await sql`
@@ -102,8 +120,6 @@ export async function insertAppointment(
         (hora_inicio < ${hora_fin} AND hora_fin > ${hora_inicio_formatted})
       )
     `
-
-    console.log('[v0] Overlapping check result:', overlapping)
 
     if (overlapping.length > 0) {
       return {
@@ -119,11 +135,11 @@ export async function insertAppointment(
       RETURNING id
     `
 
-    console.log('[v0] Insert successful:', insertResult)
+    console.log('[v0] Inserción exitosa:', insertResult)
     return { success: true }
   } catch (error) {
-    console.error('[v0] Error inserting appointment:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Error al crear el turno'
+    console.error('[v0] Error insertando turno:', error)
+    const errorMessage = error instanceof Error ? error.message : JSON.stringify(error)
     return {
       success: false,
       error: errorMessage
