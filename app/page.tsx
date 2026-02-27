@@ -15,10 +15,10 @@ async function AppointmentsList() {
     if (!process.env.DATABASE_URL) {
       return (
         <div className="flex flex-col items-center justify-center min-h-96 gap-4">
-          <AlertCircle className="w-12 h-12 text-red-500" />
+          <AlertCircle className="w-12 h-12 text-destructive" />
           <div className="text-center">
-            <p className="text-red-600 font-semibold">Error de Configuración</p>
-            <p className="text-sm text-slate-500 mt-2">
+            <p className="text-destructive font-heading font-semibold">Error de Configuración</p>
+            <p className="text-sm text-foreground/60 mt-2">
               DATABASE_URL no está configurado. Por favor, agrega la variable de entorno en los settings de v0.
             </p>
           </div>
@@ -31,8 +31,8 @@ async function AppointmentsList() {
     if (appointments.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center min-h-96 gap-4">
-          <CalendarX className="w-12 h-12 text-slate-300" />
-          <p className="text-slate-400 text-center text-lg">
+          <CalendarX className="w-12 h-12 text-muted-foreground" />
+          <p className="text-muted-foreground text-center text-lg">
             No hay turnos agendados para hoy
           </p>
         </div>
@@ -41,7 +41,7 @@ async function AppointmentsList() {
 
     return (
       <>
-        <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide px-1">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide px-1">
           Turnos de Hoy
         </h2>
         <div className="space-y-3">
@@ -58,10 +58,10 @@ async function AppointmentsList() {
     console.error('Error loading appointments:', error)
     return (
       <div className="flex flex-col items-center justify-center min-h-96 gap-4">
-        <AlertCircle className="w-12 h-12 text-amber-600" />
+        <AlertCircle className="w-12 h-12 text-destructive" />
         <div className="text-center">
-          <p className="text-amber-600 font-semibold">Error al cargar turnos</p>
-          <p className="text-sm text-slate-500 mt-2">
+          <p className="text-destructive font-heading font-semibold">Error al cargar turnos</p>
+          <p className="text-sm text-foreground/60 mt-2">
             Verifica que DATABASE_URL esté configurado correctamente.
           </p>
         </div>
@@ -80,7 +80,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       <Header />
 
       {/* Main content area */}

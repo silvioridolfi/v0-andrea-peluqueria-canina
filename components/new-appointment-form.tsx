@@ -128,9 +128,9 @@ export default function NewAppointmentForm({
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
-      <DrawerContent className="bg-white">
+      <DrawerContent className="bg-background border-border">
         <DrawerHeader>
-          <DrawerTitle>Nuevo Turno</DrawerTitle>
+          <DrawerTitle className="font-heading">Nuevo Turno</DrawerTitle>
           <DrawerDescription>
             Completa los datos para agendar un nuevo turno
           </DrawerDescription>
@@ -139,7 +139,7 @@ export default function NewAppointmentForm({
         <form onSubmit={handleSubmit} className="px-4 pb-6 space-y-4">
           {/* Mascota Combobox */}
           <div className="space-y-2">
-            <Label htmlFor="mascota">Mascota</Label>
+            <Label htmlFor="mascota" className="font-heading">Mascota</Label>
             <PetCombobox
               pets={pets}
               value={formData.mascota_id}
@@ -149,7 +149,7 @@ export default function NewAppointmentForm({
 
           {/* Fecha Input */}
           <div className="space-y-2">
-            <Label htmlFor="fecha">Fecha</Label>
+            <Label htmlFor="fecha" className="font-heading">Fecha</Label>
             <Input
               id="fecha"
               type="date"
@@ -160,7 +160,7 @@ export default function NewAppointmentForm({
 
           {/* Hora Input */}
           <div className="space-y-2">
-            <Label htmlFor="hora">Hora</Label>
+            <Label htmlFor="hora" className="font-heading">Hora</Label>
             <Input
               id="hora"
               type="time"
@@ -171,7 +171,7 @@ export default function NewAppointmentForm({
 
           {/* Servicio Select */}
           <div className="space-y-2">
-            <Label htmlFor="servicio">Servicio</Label>
+            <Label htmlFor="servicio" className="font-heading">Servicio</Label>
             <Select
               value={formData.servicio}
               onValueChange={(value) => handleInputChange('servicio', value)}
@@ -191,7 +191,7 @@ export default function NewAppointmentForm({
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-heading"
           >
             {isLoading ? 'Guardando...' : 'Guardar Turno'}
           </Button>
@@ -200,7 +200,7 @@ export default function NewAppointmentForm({
             <Button
               type="button"
               variant="outline"
-              className="w-full"
+              className="w-full font-heading"
               disabled={isLoading}
             >
               Cancelar

@@ -11,31 +11,31 @@ export default function AppointmentCard({ appointment }: AppointmentCardProps) {
   const isCompleted = appointment.estado === 'finalizado'
 
   return (
-    <Card className="bg-white border border-slate-200 overflow-hidden">
+    <Card className="bg-card border-border overflow-hidden">
       <div className="p-4 space-y-3">
         {/* Time - Large and prominent */}
         <div className="flex items-start justify-between">
-          <div className="text-3xl font-bold text-amber-600">
+          <div className="text-3xl font-heading font-bold text-primary">
             {appointment.hora_inicio}
           </div>
           {isCompleted && (
-            <Badge className="bg-emerald-500 text-white">Finalizado</Badge>
+            <Badge className="bg-accent text-accent-foreground">Finalizado</Badge>
           )}
         </div>
 
         {/* Pet name - Large and bold */}
         <div>
-          <h3 className="text-xl font-bold text-slate-900">
+          <h3 className="text-xl font-heading font-semibold text-foreground">
             {appointment.mascota_nombre}
           </h3>
         </div>
 
         {/* Race and service - Secondary text */}
         <div className="space-y-1">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-foreground/70">
             <span className="font-medium">{appointment.mascota_raza}</span>
           </p>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-foreground/60">
             {appointment.servicio}
           </p>
         </div>
@@ -43,7 +43,7 @@ export default function AppointmentCard({ appointment }: AppointmentCardProps) {
         {/* Action button */}
         {!isCompleted && (
           <Button
-            className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             Finalizar y Cobrar
           </Button>
