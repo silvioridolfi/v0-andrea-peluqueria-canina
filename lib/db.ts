@@ -1,6 +1,16 @@
 import { neon } from '@neondatabase/serverless'
 
-const sql = neon(process.env.DATABASE_URL || '')
+let sql: any = null
+
+function getSql() {
+  if (!sql) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured. Please set the environment variable.')
+    }
+    sql = neon(process.env.DATABASE_URL)
+  }
+  return sql
+}
 
 export interface Appointment {
   id: number
@@ -29,7 +39,7 @@ export async function getTodayAppointments(): Promise<Appointment[]> {
 
     const today = new Date().toISOString().split('T')[0]
 
-    const result = await sql`
+    const result = await getSql()`
       SELECT 
         t.id,
         t.hora_inicio,
@@ -59,7 +69,7 @@ export async function getAllPets(): Promise<Pet[]> {
       throw new Error('DATABASE_URL is not configured')
     }
 
-    const result = await sql`
+    const result = await getSql()`
       SELECT id, nombre, raza, tipo_animal
       FROM mascotas
       ORDER BY nombre ASC
@@ -119,7 +129,7 @@ export async function insertAppointment(
     console.log('[v0] INTENTANDO INSERTAR:', { mascota_id, fecha, hora_inicio_formatted, hora_fin, servicio })
 
     // Check for overlapping appointments
-    const overlapping = await sql`
+    const overlapping = await getSql()`
       SELECT id FROM turnos
       WHERE mascota_id = ${mascota_id}
       AND DATE(fecha) = ${fecha}
@@ -136,7 +146,7 @@ export async function insertAppointment(
     }
 
     // Insert the appointment using Neon SQL syntax
-    const insertResult = await sql`
+    const insertResult = await getSql()`
       INSERT INTO turnos (mascota_id, fecha, hora_inicio, hora_fin, servicio, estado, precio_final)
       VALUES (${mascota_id}, ${fecha}, ${hora_inicio_formatted}, ${hora_fin}, ${servicio}, 'agendado', 0)
       RETURNING id
@@ -166,7 +176,7 @@ export async function finalizarTurnoDb(
     console.log('[v0] finalizarTurnoDb: Actualizando turno', turnoId, 'con precio:', precio)
 
     // Update turno - set estado to 'finalizado' and precio_final
-    const updateResult = await sql`
+    const updateResult = await getSql()`
       UPDATE turnos
       SET estado = 'finalizado', precio_final = ${precio}
       WHERE id = ${turnoId}
@@ -183,7 +193,7 @@ export async function finalizarTurnoDb(
     console.log('[v0] Turno actualizado:', updateResult)
 
     // Insert into movimientos_financieros
-    const movimientoResult = await sql`
+    const movimientoResult = await getSql()`
       INSERT INTO movimientos_financieros (tipo, monto, turno_id, descripcion, fecha)
       VALUES ('ingreso', ${precio}, ${turnoId}, 'Cobro de servicio', CURRENT_DATE)
       RETURNING id
@@ -208,7 +218,7 @@ export async function getAppointmentsByDate(fecha: string): Promise<Appointment[
       throw new Error('DATABASE_URL is not configured')
     }
 
-    const result = await sql`
+    const result = await getSql()`
       SELECT 
         t.id,
         t.hora_inicio,
@@ -242,7 +252,7 @@ export async function getAppointmentsByMonth(year: number, month: number): Promi
     const firstDay = new Date(year, month - 1, 1).toISOString().split('T')[0]
     const lastDay = new Date(year, month, 0).toISOString().split('T')[0]
 
-    const result = await sql`
+    const result = await getSql()`
       SELECT DATE(t.fecha) as fecha, COUNT(*) as count
       FROM turnos t
       WHERE DATE(t.fecha) BETWEEN ${firstDay} AND ${lastDay}
