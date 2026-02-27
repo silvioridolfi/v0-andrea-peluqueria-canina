@@ -10,6 +10,8 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -17,9 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
+import PetCombobox from '@/components/pet-combobox'
 import { crearTurno } from '@/lib/actions'
 import { Pet } from '@/lib/db'
 
@@ -42,6 +43,18 @@ export default function NewAppointmentForm({
     servicio: 'Corte',
   })
   const { toast } = useToast()
+
+  // Reset form when drawer closes
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        mascota_id: '',
+        fecha: new Date().toISOString().split('T')[0],
+        hora_inicio: '10:00',
+        servicio: 'Corte',
+      })
+    }
+  }, [isOpen])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -76,13 +89,8 @@ export default function NewAppointmentForm({
           title: 'Éxito',
           description: 'Turno creado correctamente',
         })
+        // Close drawer after success
         onOpenChange(false)
-        setFormData({
-          mascota_id: '',
-          fecha: new Date().toISOString().split('T')[0],
-          hora_inicio: '10:00',
-          servicio: 'Corte',
-        })
       } else {
         toast({
           title: 'Error',
@@ -91,6 +99,7 @@ export default function NewAppointmentForm({
         })
       }
     } catch (error) {
+      console.error('[v0] Error in handleSubmit:', error)
       toast({
         title: 'Error',
         description: 'Error al crear el turno',
@@ -112,24 +121,14 @@ export default function NewAppointmentForm({
         </DrawerHeader>
 
         <form onSubmit={handleSubmit} className="px-4 pb-6 space-y-4">
-          {/* Mascota Select */}
+          {/* Mascota Combobox */}
           <div className="space-y-2">
             <Label htmlFor="mascota">Mascota</Label>
-            <Select
+            <PetCombobox
+              pets={pets}
               value={formData.mascota_id}
               onValueChange={(value) => handleInputChange('mascota_id', value)}
-            >
-              <SelectTrigger id="mascota">
-                <SelectValue placeholder="Selecciona una mascota" />
-              </SelectTrigger>
-              <SelectContent>
-                {pets.map(pet => (
-                  <SelectItem key={pet.id} value={pet.id.toString()}>
-                    {pet.nombre} ({pet.raza})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </div>
 
           {/* Fecha Input */}
@@ -172,7 +171,7 @@ export default function NewAppointmentForm({
             </Select>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit Button with loading state */}
           <Button
             type="submit"
             disabled={isLoading}
@@ -186,6 +185,7 @@ export default function NewAppointmentForm({
               type="button"
               variant="outline"
               className="w-full"
+              disabled={isLoading}
             >
               Cancelar
             </Button>

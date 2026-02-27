@@ -83,10 +83,15 @@ export async function insertAppointment(
       throw new Error('DATABASE_URL is not configured')
     }
 
-    // Calculate hora_fin (1 hour after hora_inicio)
+    console.log('[v0] insertAppointment called with:', { mascota_id, fecha, hora_inicio, servicio })
+
+    // Calculate hora_fin (1 hour after hora_inicio) with proper HH:MM:SS format
     const [hours, minutes] = hora_inicio.split(':').map(Number)
     const endTime = new Date(0, 0, 0, hours + 1, minutes)
-    const hora_fin = `${String(endTime.getHours()).padStart(2, '0')}:${String(endTime.getMinutes()).padStart(2, '0')}`
+    const hora_fin = `${String(endTime.getHours()).padStart(2, '0')}:${String(endTime.getMinutes()).padStart(2, '0')}:00`
+    const hora_inicio_formatted = `${hora_inicio}:00`
+
+    console.log('[v0] Calculated times:', { hora_inicio_formatted, hora_fin })
 
     // Check for overlapping appointments
     const overlapping = await sql`
@@ -94,9 +99,11 @@ export async function insertAppointment(
       WHERE mascota_id = ${mascota_id}
       AND DATE(fecha) = ${fecha}
       AND (
-        (hora_inicio < ${hora_fin} AND hora_fin > ${hora_inicio})
+        (hora_inicio < ${hora_fin} AND hora_fin > ${hora_inicio_formatted})
       )
     `
+
+    console.log('[v0] Overlapping check result:', overlapping)
 
     if (overlapping.length > 0) {
       return {
@@ -106,17 +113,20 @@ export async function insertAppointment(
     }
 
     // Insert the appointment
-    await sql`
+    const insertResult = await sql`
       INSERT INTO turnos (mascota_id, fecha, hora_inicio, hora_fin, servicio, estado, precio_final)
-      VALUES (${mascota_id}, ${fecha}, ${hora_inicio}, ${hora_fin}, ${servicio}, 'agendado', 0)
+      VALUES (${mascota_id}, ${fecha}, ${hora_inicio_formatted}, ${hora_fin}, ${servicio}, 'agendado', 0)
+      RETURNING id
     `
 
+    console.log('[v0] Insert successful:', insertResult)
     return { success: true }
   } catch (error) {
-    console.error('Error inserting appointment:', error)
+    console.error('[v0] Error inserting appointment:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Error al crear el turno'
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Error al crear el turno'
+      error: errorMessage
     }
   }
 }
