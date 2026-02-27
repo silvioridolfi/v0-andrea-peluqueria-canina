@@ -77,8 +77,14 @@ export default function NewAppointmentForm({
 
     setIsLoading(true)
     try {
+      // Ensure mascota_id is a valid number
+      const mascotaIdNum = parseInt(formData.mascota_id, 10)
+      if (isNaN(mascotaIdNum)) {
+        throw new Error('ID de mascota inválido')
+      }
+
       const result = await crearTurno({
-        mascota_id: parseInt(formData.mascota_id),
+        mascota_id: mascotaIdNum,
         fecha: formData.fecha,
         hora_inicio: formData.hora_inicio,
         servicio: formData.servicio,
@@ -102,9 +108,10 @@ export default function NewAppointmentForm({
       }
     } catch (error) {
       console.error('[v0] Error in handleSubmit:', error)
+      const errorMsg = error instanceof Error ? error.message : 'Error al crear el turno'
       toast({
         title: 'Error',
-        description: 'Error al crear el turno',
+        description: errorMsg,
         variant: 'destructive',
       })
     } finally {

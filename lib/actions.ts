@@ -10,9 +10,12 @@ export async function crearTurno(formData: {
   servicio: string
 }) {
   try {
+    // Ensure fecha is in YYYY-MM-DD format
+    const fechaStr = new Date(formData.fecha).toISOString().split('T')[0]
+    
     const result = await insertAppointment(
       formData.mascota_id,
-      formData.fecha,
+      fechaStr,
       formData.hora_inicio,
       formData.servicio
     )
@@ -28,12 +31,12 @@ export async function crearTurno(formData: {
     revalidatePath('/')
 
     return { success: true }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : JSON.stringify(error)
-    console.error('[v0] Error in crearTurno:', errorMessage)
+  } catch (error: any) {
+    const errorMsg = error?.message || String(error)
+    console.error('[v0] SQL ERROR in crearTurno:', errorMsg)
     return {
       success: false,
-      error: errorMessage
+      error: errorMsg
     }
   }
 }

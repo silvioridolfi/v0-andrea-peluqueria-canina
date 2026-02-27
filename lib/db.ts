@@ -91,10 +91,18 @@ export async function insertAppointment(
       }
     }
 
+    // Validate fecha format (YYYY-MM-DD)
+    if (!fecha || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+      return {
+        success: false,
+        error: 'Formato de fecha inválido (debe ser YYYY-MM-DD)'
+      }
+    }
+
     // Format times strictly: if hora_inicio is "10:30", calculate hora_fin properly
     const [h, m] = hora_inicio.split(':')
-    const horaNum = parseInt(h)
-    const minNum = parseInt(m)
+    const horaNum = parseInt(h, 10)
+    const minNum = parseInt(m, 10)
     
     if (isNaN(horaNum) || isNaN(minNum)) {
       return {
@@ -108,7 +116,6 @@ export async function insertAppointment(
     const hora_inicio_formatted = `${String(horaNum).padStart(2, '0')}:${String(minNum).padStart(2, '0')}:00`
     const hora_fin = `${String(horaFinNum).padStart(2, '0')}:${String(minNum).padStart(2, '0')}:00`
 
-    // Log the payload BEFORE making the query
     console.log('[v0] INTENTANDO INSERTAR:', { mascota_id, fecha, hora_inicio_formatted, hora_fin, servicio })
 
     // Check for overlapping appointments
@@ -128,7 +135,7 @@ export async function insertAppointment(
       }
     }
 
-    // Insert the appointment
+    // Insert the appointment using Neon SQL syntax
     const insertResult = await sql`
       INSERT INTO turnos (mascota_id, fecha, hora_inicio, hora_fin, servicio, estado, precio_final)
       VALUES (${mascota_id}, ${fecha}, ${hora_inicio_formatted}, ${hora_fin}, ${servicio}, 'agendado', 0)
@@ -137,12 +144,12 @@ export async function insertAppointment(
 
     console.log('[v0] Inserción exitosa:', insertResult)
     return { success: true }
-  } catch (error) {
-    console.error('[v0] Error insertando turno:', error)
-    const errorMessage = error instanceof Error ? error.message : JSON.stringify(error)
+  } catch (error: any) {
+    const errorMsg = error?.message || String(error)
+    console.error('[v0] Error insertando turno:', errorMsg)
     return {
       success: false,
-      error: errorMessage
+      error: errorMsg
     }
   }
 }
