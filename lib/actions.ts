@@ -97,3 +97,58 @@ export async function finalizarTurno(turnoId: number, precio: string | number) {
     }
   }
 }
+
+export async function updateMascotaCliente(
+  petId: string,
+  clienteId: string | undefined,
+  data: {
+    notas?: string
+    telefono?: string
+  }
+) {
+  try {
+    console.log('[v0] updateMascotaCliente: petId=', petId, 'clienteId=', clienteId, 'data=', data)
+
+    if (!petId || typeof petId !== 'string') {
+      return {
+        success: false,
+        error: 'ID de mascota inválido'
+      }
+    }
+
+    const { neon } = require('@neondatabase/serverless')
+    const sql = neon(process.env.DATABASE_URL)
+
+    // Update mascota notas if provided
+    if (data.notas !== undefined) {
+      console.log('[v0] Actualizando notas de mascota:', data.notas)
+      await sql`
+        UPDATE mascotas
+        SET notas = ${data.notas}
+        WHERE id = ${petId}
+      `
+    }
+
+    // Update cliente telefono if provided and clienteId exists
+    if (data.telefono !== undefined && clienteId) {
+      console.log('[v0] Actualizando teléfono de cliente:', data.telefono)
+      await sql`
+        UPDATE clientes
+        SET telefono = ${data.telefono}
+        WHERE id = ${clienteId}
+      `
+    }
+
+    revalidatePath('/')
+    console.log('[v0] updateMascotaCliente: Éxito')
+    
+    return { success: true }
+  } catch (error: any) {
+    const errorMsg = error?.message || String(error)
+    console.error('[v0] updateMascotaCliente ERROR:', errorMsg)
+    return {
+      success: false,
+      error: errorMsg
+    }
+  }
+}

@@ -48,6 +48,15 @@ export interface Pet {
   tipo_animal: string
 }
 
+export interface PetDetail extends Pet {
+  tamaño?: string
+  sexo?: string
+  notas?: string
+  cliente_id?: string
+  cliente_nombre?: string
+  cliente_telefono?: string
+}
+
 export async function getTodayAppointments(): Promise<Appointment[]> {
   try {
     if (!process.env.DATABASE_URL) {
@@ -318,6 +327,112 @@ export async function getDiasConTurnos(year: number, month: number): Promise<Dat
     return diasConTurnos
   } catch (error) {
     console.error('[v0] Error fetching days with appointments:', error)
+    return []
+  }
+}
+
+export async function getPetsWithClients(searchTerm?: string): Promise<(Pet & { cliente_nombre?: string; cliente_telefono?: string })[]> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+
+    let result
+    if (searchTerm) {
+      const searchPattern = `%${searchTerm.toLowerCase()}%`
+      result = await getSql()`
+        SELECT 
+          m.id,
+          m.nombre,
+          m.raza,
+          m.tipo_animal,
+          c.nombre as cliente_nombre,
+          c.telefono as cliente_telefono
+        FROM mascotas m
+        LEFT JOIN clientes c ON m.cliente_id = c.id
+        WHERE LOWER(m.nombre) LIKE ${searchPattern}
+           OR LOWER(c.nombre) LIKE ${searchPattern}
+        ORDER BY m.nombre ASC
+      `
+    } else {
+      result = await getSql()`
+        SELECT 
+          m.id,
+          m.nombre,
+          m.raza,
+          m.tipo_animal,
+          c.nombre as cliente_nombre,
+          c.telefono as cliente_telefono
+        FROM mascotas m
+        LEFT JOIN clientes c ON m.cliente_id = c.id
+        ORDER BY m.nombre ASC
+      `
+    }
+
+    return result
+  } catch (error) {
+    console.error('[v0] Error fetching pets with clients:', error)
+    return []
+  }
+}
+
+export async function getPetDetail(petId: string): Promise<PetDetail | null> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+
+    const result = await getSql()`
+      SELECT 
+        m.id,
+        m.nombre,
+        m.raza,
+        m.tipo_animal,
+        m.tamaño,
+        m.sexo,
+        m.notas,
+        m.cliente_id,
+        c.nombre as cliente_nombre,
+        c.telefono as cliente_telefono
+      FROM mascotas m
+      LEFT JOIN clientes c ON m.cliente_id = c.id
+      WHERE m.id = ${petId}
+    `
+
+    return result.length > 0 ? result[0] : null
+  } catch (error) {
+    console.error('[v0] Error fetching pet detail:', error)
+    return null
+  }
+}
+
+export async function getPetAppointmentHistory(petId: string, limit: number = 5): Promise<Appointment[]> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+
+    const result = await getSql()`
+      SELECT 
+        t.id,
+        t.hora_inicio,
+        t.hora_fin,
+        m.nombre as mascota_nombre,
+        m.raza as mascota_raza,
+        m.tipo_animal as mascota_tipo,
+        t.servicio,
+        t.estado,
+        t.precio_final
+      FROM turnos t
+      JOIN mascotas m ON t.mascota_id = m.id
+      WHERE t.mascota_id = ${petId} AND t.estado = 'finalizado'
+      ORDER BY t.fecha DESC, t.hora_inicio DESC
+      LIMIT ${limit}
+    `
+
+    return result as Appointment[]
+  } catch (error) {
+    console.error('[v0] Error fetching pet appointment history:', error)
     return []
   }
 }
