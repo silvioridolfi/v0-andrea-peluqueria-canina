@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { insertAppointment, finalizarTurnoDb } from '@/lib/db'
+import { insertAppointment, finalizarTurnoDb, crearMascotaConClienteDb } from '@/lib/db'
 
 export async function crearTurno(formData: {
   mascota_id: string  // UUID string
@@ -136,6 +136,39 @@ export async function updateMascotaCliente(
   } catch (error: any) {
     const errorMsg = error?.message || String(error)
     console.error('[v0] updateMascotaCliente ERROR:', errorMsg)
+    return {
+      success: false,
+      error: errorMsg
+    }
+  }
+}
+
+export async function crearMascotaConCliente(data: {
+  mascota_nombre: string
+  mascota_raza: string
+  mascota_tamaño?: string
+  mascota_sexo?: string
+  mascota_notas?: string
+  cliente_nombre: string
+  cliente_telefono: string
+}) {
+  try {
+    console.log('[v0] crearMascotaConCliente: Iniciando...')
+
+    const result = await crearMascotaConClienteDb(data)
+
+    if (!result.success) {
+      console.log('[v0] crearMascotaConCliente: Error:', result.error)
+      return result
+    }
+
+    revalidatePath('/')
+    console.log('[v0] crearMascotaConCliente: Éxito, mascota_id:', result.mascota_id)
+
+    return { success: true, mascota_id: result.mascota_id }
+  } catch (error: any) {
+    const errorMsg = error?.message || String(error)
+    console.error('[v0] crearMascotaConCliente ERROR:', errorMsg)
     return {
       success: false,
       error: errorMsg

@@ -345,10 +345,14 @@ export async function getPetsWithClients(searchTerm?: string): Promise<(Pet & { 
           m.id,
           m.nombre,
           m.raza,
-          m.tipo_animal
+          m.tipo_animal,
+          c.nombre as cliente_nombre,
+          c.telefono as cliente_telefono
         FROM mascotas m
+        LEFT JOIN clientes c ON m.cliente_id = c.id
         WHERE LOWER(m.nombre) LIKE ${searchPattern}
            OR LOWER(m.raza) LIKE ${searchPattern}
+           OR LOWER(c.nombre) LIKE ${searchPattern}
         ORDER BY m.nombre ASC
       `
     } else {
@@ -357,8 +361,11 @@ export async function getPetsWithClients(searchTerm?: string): Promise<(Pet & { 
           m.id,
           m.nombre,
           m.raza,
-          m.tipo_animal
+          m.tipo_animal,
+          c.nombre as cliente_nombre,
+          c.telefono as cliente_telefono
         FROM mascotas m
+        LEFT JOIN clientes c ON m.cliente_id = c.id
         ORDER BY m.nombre ASC
       `
     }
@@ -385,8 +392,11 @@ export async function getPetDetail(petId: string): Promise<PetDetail | null> {
         m.tamaño,
         m.sexo,
         m.notas,
-        m.cliente_id
+        m.cliente_id,
+        c.nombre as cliente_nombre,
+        c.telefono as cliente_telefono
       FROM mascotas m
+      LEFT JOIN clientes c ON m.cliente_id = c.id
       WHERE m.id = ${petId}
     `
 
@@ -425,5 +435,74 @@ export async function getPetAppointmentHistory(petId: string, limit: number = 5)
   } catch (error) {
     console.error('[v0] Error fetching pet appointment history:', error)
     return []
+  }
+}
+
+export async function crearMascotaConClienteDb(data: {
+  mascota_nombre: string
+  mascota_raza: string
+  mascota_tamaño?: string
+  mascota_sexo?: string
+  mascota_notas?: string
+  cliente_nombre: string
+  cliente_telefono: string
+}): Promise<{ success: boolean; error?: string; mascota_id?: string }> {
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not configured')
+    }
+
+    // Validate required fields
+    if (!data.mascota_nombre || !data.cliente_nombre || !data.cliente_telefono) {
+      return {
+        success: false,
+        error: 'Los campos de nombre de mascota, dueño y teléfono son requeridos'
+      }
+    }
+
+    // First, insert the cliente
+    console.log('[v0] Insertando cliente:', data.cliente_nombre, data.cliente_telefono)
+    const clienteResult = await getSql()`
+      INSERT INTO clientes (nombre, telefono)
+      VALUES (${data.cliente_nombre}, ${data.cliente_telefono})
+      RETURNING id
+    `
+
+    if (!clienteResult || clienteResult.length === 0) {
+      return {
+        success: false,
+        error: 'Error al crear el cliente'
+      }
+    }
+
+    const clienteId = clienteResult[0].id
+    console.log('[v0] Cliente creado con ID:', clienteId)
+
+    // Then, insert the mascota with the cliente_id
+    console.log('[v0] Insertando mascota para cliente:', clienteId)
+    const mascotaResult = await getSql()`
+      INSERT INTO mascotas (nombre, raza, tipo_animal, tamaño, sexo, notas, cliente_id)
+      VALUES (${data.mascota_nombre}, ${data.mascota_raza}, 'perro', ${data.mascota_tamaño || null}, ${data.mascota_sexo || null}, ${data.mascota_notas || null}, ${clienteId})
+      RETURNING id
+    `
+
+    if (!mascotaResult || mascotaResult.length === 0) {
+      return {
+        success: false,
+        error: 'Error al crear la mascota'
+      }
+    }
+
+    const mascotaId = mascotaResult[0].id
+    console.log('[v0] Mascota creada con ID:', mascotaId)
+
+    return { success: true, mascota_id: mascotaId }
+  } catch (error: any) {
+    const errorMsg = error?.message || String(error)
+    console.error('[v0] Error creando mascota con cliente:', errorMsg)
+    return {
+      success: false,
+      error: errorMsg
+    }
   }
 }
