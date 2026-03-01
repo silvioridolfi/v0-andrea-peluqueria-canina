@@ -345,13 +345,10 @@ export async function getPetsWithClients(searchTerm?: string): Promise<(Pet & { 
           m.id,
           m.nombre,
           m.raza,
-          m.tipo_animal,
-          c.nombre as cliente_nombre,
-          c.telefono as cliente_telefono
+          m.tipo_animal
         FROM mascotas m
-        LEFT JOIN clientes c ON m.cliente_id = c.id
         WHERE LOWER(m.nombre) LIKE ${searchPattern}
-           OR LOWER(c.nombre) LIKE ${searchPattern}
+           OR LOWER(m.raza) LIKE ${searchPattern}
         ORDER BY m.nombre ASC
       `
     } else {
@@ -360,11 +357,8 @@ export async function getPetsWithClients(searchTerm?: string): Promise<(Pet & { 
           m.id,
           m.nombre,
           m.raza,
-          m.tipo_animal,
-          c.nombre as cliente_nombre,
-          c.telefono as cliente_telefono
+          m.tipo_animal
         FROM mascotas m
-        LEFT JOIN clientes c ON m.cliente_id = c.id
         ORDER BY m.nombre ASC
       `
     }
@@ -391,11 +385,8 @@ export async function getPetDetail(petId: string): Promise<PetDetail | null> {
         m.tamaño,
         m.sexo,
         m.notas,
-        m.cliente_id,
-        c.nombre as cliente_nombre,
-        c.telefono as cliente_telefono
+        m.cliente_id
       FROM mascotas m
-      LEFT JOIN clientes c ON m.cliente_id = c.id
       WHERE m.id = ${petId}
     `
 

@@ -26,8 +26,7 @@ export default function MascotaEditForm({
 }: MascotaEditFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
-    notas: petDetail?.notas || '',
-    telefono: petDetail?.cliente_telefono || ''
+    notas: petDetail?.notas || ''
   })
   const { toast } = useToast()
 
@@ -36,9 +35,8 @@ export default function MascotaEditForm({
     setIsLoading(true)
 
     try {
-      const result = await updateMascotaCliente(petId, petDetail?.cliente_id, {
-        notas: formData.notas,
-        telefono: formData.telefono || undefined
+      const result = await updateMascotaCliente(petId, undefined, {
+        notas: formData.notas
       })
 
       if (result.success) {
@@ -87,22 +85,6 @@ export default function MascotaEditForm({
               className="min-h-[100px] resize-none"
             />
           </div>
-
-          {/* Teléfono */}
-          {petDetail?.cliente_nombre && (
-            <div className="space-y-2">
-              <Label htmlFor="telefono" className="font-heading">
-                Teléfono del Dueño
-              </Label>
-              <Input
-                id="telefono"
-                type="tel"
-                placeholder="+54 11 1234-5678"
-                value={formData.telefono}
-                onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-              />
-            </div>
-          )}
 
           {/* Buttons */}
           <div className="flex gap-2 pt-4">

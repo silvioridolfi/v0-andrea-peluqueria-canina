@@ -5,7 +5,6 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } f
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { getPetDetail, getPetAppointmentHistory } from '@/lib/db'
-import { Phone, MessageCircle } from 'lucide-react'
 import MascotaEditForm from '@/components/mascota-edit-form'
 
 interface MascotaDetailDrawerProps {
@@ -45,23 +44,6 @@ export default function MascotaDetailDrawer({
 
     fetchData()
   }, [isOpen, petId])
-
-  if (!petDetail && !isLoading) {
-    return null
-  }
-
-  const handleCall = () => {
-    if (petDetail?.cliente_telefono) {
-      window.location.href = `tel:${petDetail.cliente_telefono}`
-    }
-  }
-
-  const handleWhatsApp = () => {
-    if (petDetail?.cliente_telefono) {
-      const phone = petDetail.cliente_telefono.replace(/\D/g, '')
-      window.open(`https://wa.me/54${phone}`, '_blank')
-    }
-  }
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
@@ -104,39 +86,6 @@ export default function MascotaDetailDrawer({
                 </p>
               </div>
             </Card>
-
-            {/* Owner Info */}
-            {petDetail?.cliente_nombre && (
-              <Card className="bg-card border-border p-4 space-y-3">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Dueño</p>
-                <p className="text-sm font-medium text-foreground">
-                  {petDetail.cliente_nombre}
-                </p>
-
-                {petDetail?.cliente_telefono && (
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      onClick={handleCall}
-                      size="sm"
-                      variant="outline"
-                      className="flex-1 gap-2"
-                    >
-                      <Phone className="w-4 h-4" />
-                      Llamar
-                    </Button>
-                    <Button
-                      onClick={handleWhatsApp}
-                      size="sm"
-                      variant="outline"
-                      className="flex-1 gap-2"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      WhatsApp
-                    </Button>
-                  </div>
-                )}
-              </Card>
-            )}
 
             {/* Appointment History */}
             {appointments.length > 0 && (

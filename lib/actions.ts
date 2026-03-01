@@ -107,7 +107,7 @@ export async function updateMascotaCliente(
   }
 ) {
   try {
-    console.log('[v0] updateMascotaCliente: petId=', petId, 'clienteId=', clienteId, 'data=', data)
+    console.log('[v0] updateMascotaCliente: petId=', petId, 'data=', data)
 
     if (!petId || typeof petId !== 'string') {
       return {
@@ -126,16 +126,6 @@ export async function updateMascotaCliente(
         UPDATE mascotas
         SET notas = ${data.notas}
         WHERE id = ${petId}
-      `
-    }
-
-    // Update cliente telefono if provided and clienteId exists
-    if (data.telefono !== undefined && clienteId) {
-      console.log('[v0] Actualizando teléfono de cliente:', data.telefono)
-      await sql`
-        UPDATE clientes
-        SET telefono = ${data.telefono}
-        WHERE id = ${clienteId}
       `
     }
 
