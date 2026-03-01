@@ -7,12 +7,25 @@ interface BottomNavigationProps {
   activeTab?: 'hoy' | 'agenda' | 'mascotas' | 'finanzas'
 }
 
-export default function BottomNavigation({ activeTab = 'hoy' }: BottomNavigationProps) {
+export default function BottomNavigation({ activeTab }: BottomNavigationProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Determine active tab from pathname if not provided
-  const currentTab = activeTab || (pathname?.includes('/agenda') ? 'agenda' : 'hoy')
+  // Determine active tab from pathname, with activeTab prop as override
+  let currentTab: string = 'hoy'
+  if (activeTab) {
+    currentTab = activeTab
+  } else if (pathname) {
+    if (pathname.includes('/agenda')) {
+      currentTab = 'agenda'
+    } else if (pathname.includes('/mascotas')) {
+      currentTab = 'mascotas'
+    } else if (pathname.includes('/finanzas')) {
+      currentTab = 'finanzas'
+    } else {
+      currentTab = 'hoy'
+    }
+  }
 
   const navItems = [
     { id: 'hoy', label: 'Hoy', icon: Calendar, href: '/' },

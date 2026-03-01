@@ -1,5 +1,6 @@
 import { getAppointmentsByMonth, getAppointmentsByDate, getAllPets, getDiasConTurnos, getTodayDateString } from '@/lib/db'
 import AgendaClient from '@/components/agenda-client'
+import BottomNavigation from '@/components/bottom-navigation'
 
 export const metadata = {
   title: 'Andrea | Peluquería Canina - Agenda',
@@ -51,6 +52,8 @@ export default async function AgendaPage() {
           />
         </div>
       </main>
+
+      <BottomNavigation activeTab="agenda" />
     </div>
   )
 }

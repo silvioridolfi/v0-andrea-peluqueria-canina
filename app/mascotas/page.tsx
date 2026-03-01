@@ -1,5 +1,6 @@
 import { getPetsWithClients, getAllPets } from '@/lib/db'
 import MascotasClient from '@/components/mascotas-client'
+import BottomNavigation from '@/components/bottom-navigation'
 
 export const metadata = {
   title: 'Andrea | Peluquería Canina - Mascotas',
@@ -32,6 +33,8 @@ export default async function MascotasPage() {
           <MascotasClient initialPets={petsWithClients} />
         </div>
       </main>
+
+      <BottomNavigation activeTab="mascotas" />
     </div>
   )
 }
